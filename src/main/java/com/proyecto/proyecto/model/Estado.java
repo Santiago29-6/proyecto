@@ -10,7 +10,7 @@ public class Estado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Long id;
     @ManyToOne
     @JoinColumn(name = "id_pais")
     private Pais pais;
