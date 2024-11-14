@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.proyecto.proyecto.model.Pais;
-import com.proyecto.proyecto.service.PaisService;
+import com.proyecto.proyecto.service.PaisServiceImpl;
 
 @RestController
 @RequestMapping("/pais/")
 public class PaisController {
 
     @Autowired
-    private PaisService paisService;
+    private PaisServiceImpl paisServiceImp;
 
     @GetMapping
-    private ResponseEntity<List<Pais>> getAllPaises(){
-        return ResponseEntity.ok(paisService.findAll());
+    public ResponseEntity<List<Pais>> getAllPaises(){
+        return ResponseEntity.ok(paisServiceImp.findAllPais());
     }
 }
