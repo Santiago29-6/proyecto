@@ -1,0 +1,28 @@
+<div class="container-fluid p-4">
+  <h2>Crear persona</h2>
+  <form [formGroup]="personaForm" (ngSubmit)="guardar()">
+    <div class="form-group">
+      <label for="">Nombre</label>
+      <input type="text" formControlName="nombre" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="">Apellido</label>
+      <input type="text" formControlName="apellido" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="">Edad</label>
+      <input type="number" formControlName="edad" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="">Pais</label>
+      <select name="pais" id="pais" formControlName="pais" class="form-select">
+        <option value="item.id" *ngFor="let item of paises"></option>
+      </select>
+    </div>
+    <div class="form-control">
+      <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+  </form>
+</div>
+
+<router-outlet></router-outlet>
