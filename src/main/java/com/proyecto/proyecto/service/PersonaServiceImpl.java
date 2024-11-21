@@ -1,6 +1,7 @@
 package com.proyecto.proyecto.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,5 +33,9 @@ public class PersonaServiceImpl implements PersonaService{
     @Override
     public Persona savePersona(Persona entity){
         return personaRepository.save(entity);
+    }
+    @Override
+    public Optional<Persona> findPersonaById(Long id_persona){
+        return personaRepository.findById(id_persona);
     }
 }
