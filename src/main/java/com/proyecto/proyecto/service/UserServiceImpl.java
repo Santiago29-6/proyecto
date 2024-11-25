@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.proyecto.proyecto.model.Role;
 import com.proyecto.proyecto.model.User;
@@ -14,6 +15,7 @@ import com.proyecto.proyecto.security.jwt.JwtProvider;
 
 import jakarta.transaction.Transactional;
 
+@Service
 public class UserServiceImpl implements UserService{
 
     @Autowired
