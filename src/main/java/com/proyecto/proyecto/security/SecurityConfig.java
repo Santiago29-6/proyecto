@@ -13,8 +13,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.proyecto.proyecto.model.Role;
 import com.proyecto.proyecto.security.jwt.JwtAutorizationFilter;
@@ -70,15 +68,4 @@ public class SecurityConfig {
     public JwtAutorizationFilter jwtAutorizationFilter() {
         return new JwtAutorizationFilter();
     }
-
-    @Bean WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("*");
-            }
-        };
-    }
-
-
 }
