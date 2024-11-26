@@ -25,8 +25,11 @@ public class ProyectoApplication {
 		return new WebMvcConfigurer(){
 			@Override
 			public void addCorsMappings(CorsRegistry registry){
-                registry.addMapping("/**").allowedOrigins("*");
-				registry.addMapping("/**").allowedOrigins("http://localhost:4200").allowedMethods("*").allowedHeaders("*");
+                registry.addMapping("/**")
+                    .allowedOrigins("http://localhost:4200")
+                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                    .allowedHeaders("*")
+                    .allowCredentials(true);
 			}
 		};
 	}

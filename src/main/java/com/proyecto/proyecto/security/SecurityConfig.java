@@ -17,8 +17,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.proyecto.proyecto.model.Role;
 import com.proyecto.proyecto.security.jwt.JwtAutorizationFilter;
 
-@EnableWebSecurity
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -55,10 +55,12 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/authetication/sign-in", "/authentication/sign-up").permitAll()
+                .requestMatchers("/authentication/sign-in", "/authentication/sign-up").permitAll()
                 .requestMatchers(HttpMethod.GET, "/personas/").permitAll()
                 .requestMatchers("/personas/**").hasRole(Role.ADMIN.name())
-                .anyRequest().authenticated())
+                .requestMatchers("/user/**").authenticated()
+                .anyRequest().permitAll()
+            )
             .addFilterBefore(jwtAutorizationFilter(), UsernamePasswordAuthenticationFilter.class);
         
         return http.build();

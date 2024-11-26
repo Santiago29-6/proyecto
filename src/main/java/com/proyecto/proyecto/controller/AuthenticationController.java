@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.proyecto.proyecto.model.AuthRequest;
+import com.proyecto.proyecto.model.AuthResponse;
 import com.proyecto.proyecto.model.User;
 import com.proyecto.proyecto.service.AuthenticationService;
 import com.proyecto.proyecto.service.UserService;
@@ -23,7 +25,7 @@ public class AuthenticationController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("sign-up")
+    @PostMapping("/sign-up")
     public ResponseEntity<User> signUp(@RequestBody User user) {
         if(userService.findByUsername(user.getUsername()).isPresent()){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
@@ -31,8 +33,9 @@ public class AuthenticationController {
         return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
     }
 
-    @PostMapping("sign-in")
-    public ResponseEntity<User> signIn(@RequestBody User user) {
-        return new ResponseEntity<>(authenticationService.signInAndReturnJwt(user), HttpStatus.OK);
+    @PostMapping("/sign-in")
+    public ResponseEntity<AuthResponse> signIn(@RequestBody AuthRequest authRequest) {
+        String token = authenticationService.signInAndReturnJwt(authRequest);
+        return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);
     }
 }

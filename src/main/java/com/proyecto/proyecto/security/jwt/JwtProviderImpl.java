@@ -34,32 +34,32 @@ public class JwtProviderImpl implements JwtProvider{
     private String JWT_EXPIRATION_IN_MS;
 
     @Override
-    public String generateToken(UserPrincipal auth){
-        String authorities = auth.getAuthorities().stream()
+    public String generateToken(UserPrincipal auth) {
+    String authorities = auth.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.joining(","));
 
-        Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
-        long expirationsInMs = Long.parseLong(JWT_EXPIRATION_IN_MS);
+    Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
+    long expirationInMs = Long.parseLong(JWT_EXPIRATION_IN_MS);
 
-        return Jwts.builder()
-        .setSubject(auth.getUsername())
-        .claim("roles", authorities)
-        .claim("userId", auth.getId())
-        .setExpiration(new Date(System.currentTimeMillis() + expirationsInMs))
-        .signWith(key, SignatureAlgorithm.HS512)
-        .compact();         
+    return Jwts.builder()
+            .setSubject(auth.getUsername())
+            .claim("roles", authorities)
+            .claim("userId", auth.getId())
+            .setExpiration(new Date(System.currentTimeMillis() + expirationInMs))
+            .signWith(key, SignatureAlgorithm.HS512)
+            .compact();
     }
 
     @Override
     public String generateToken(User user){
         Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
-        long expirationsInMs = Long.parseLong(JWT_EXPIRATION_IN_MS);
+        long expirationInMs = Long.parseLong(JWT_EXPIRATION_IN_MS);
         return Jwts.builder()
         .setSubject(user.getUsername())
         .claim("roles", user.getRole())
         .claim("userId", user.getId())
-        .setExpiration(new Date(System.currentTimeMillis() + expirationsInMs))
+        .setExpiration(new Date(System.currentTimeMillis() + expirationInMs))
         .signWith(key, SignatureAlgorithm.HS512)
         .compact();
     }
@@ -67,11 +67,9 @@ public class JwtProviderImpl implements JwtProvider{
     @Override
     public Authentication getAuthentication(HttpServletRequest request){
         Claims claims = extractClaims(request);
-
-        if (claims == null) {
+        if (claims == null){
             return null;
         }
-
         String username = claims.getSubject();
         Long userId = claims.get("userId", Long.class);
         Set<GrantedAuthority> authorities = Arrays.stream(claims.get("roles").toString().split(","))
@@ -88,7 +86,7 @@ public class JwtProviderImpl implements JwtProvider{
             return null;
         }
 
-        return new UsernamePasswordAuthenticationToken(userDetails, null,authorities);
+        return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
 
     }
 
@@ -98,21 +96,22 @@ public class JwtProviderImpl implements JwtProvider{
         if(claims == null){
             return false;
         }
-        if (claims.getExpiration().before(new Date())) {
-            return false;            
+        if(claims.getExpiration().before(new Date())){
+            return false;
         }
         return true;
     }
 
     private Claims extractClaims(HttpServletRequest request){
         String token = SecurityUtils.extractAuthTokenFromRequest(request);
-        if (token == null) {
+        if(token == null){
             return null;
         }
+
         Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
         return Jwts.parser().setSigningKey(key)
-        .build().parseClaimsJws(token)
+        .build()
+        .parseClaimsJws(token)
         .getBody();
     }
-
 }

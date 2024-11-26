@@ -1,9 +1,9 @@
 package com.proyecto.proyecto.service;
 
-import com.proyecto.proyecto.model.User;
+import com.proyecto.proyecto.model.AuthRequest;
 
 public interface AuthenticationService {
 
-    User signInAndReturnJwt(User signInRequest);
+    String signInAndReturnJwt(AuthRequest signInRequest);
 
 }
