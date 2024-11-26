@@ -6,6 +6,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.proyecto.proyecto.model.AuthRequest;
 import com.proyecto.proyecto.model.User;
 import com.proyecto.proyecto.security.UserPrincipal;
 import com.proyecto.proyecto.security.jwt.JwtProvider;
@@ -20,7 +21,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
     private JwtProvider jwtProvider;
 
     @Override
-    public User signInAndReturnJwt(User signInRequest){
+    public String signInAndReturnJwt(AuthRequest signInRequest){
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword())
         );
@@ -31,6 +32,6 @@ public class AuthenticationServiceImpl implements AuthenticationService{
         User singInUser = userPrincipal.getUser();
         singInUser.setToken(jwt);
 
-        return singInUser;
+        return jwt;
     } 
 }
