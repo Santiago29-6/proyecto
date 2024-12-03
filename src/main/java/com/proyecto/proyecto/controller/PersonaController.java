@@ -24,10 +24,10 @@ public class PersonaController {
     }
 
     @PostMapping
-    public ResponseEntity<Persona> savePersona (@RequestBody Persona persona){
+    public ResponseEntity<Persona> savePersona(@RequestBody Persona persona) {
         try {
             Persona personaGuardada = personaServiceImpl.savePersona(persona);
-            return ResponseEntity.created(new URI("/personas/"+personaGuardada.getId())).body(personaGuardada);
+            return ResponseEntity.created(new URI("/personas/" + personaGuardada.getId())).body(personaGuardada);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

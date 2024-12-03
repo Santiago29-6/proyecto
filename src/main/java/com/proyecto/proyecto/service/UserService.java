@@ -1,5 +1,6 @@
 package com.proyecto.proyecto.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -17,5 +18,7 @@ public interface UserService {
     void changeRole(Role newRole, String username);
 
     User findByUsernameReturnToken(String username);
+
+    List<User> findAllUsers();
 
 }

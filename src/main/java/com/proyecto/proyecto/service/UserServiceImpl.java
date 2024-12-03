@@ -1,6 +1,7 @@
 package com.proyecto.proyecto.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,11 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private JwtProvider jwtProvider;
+
+    @Override
+    public List<User> findAllUsers(){
+        return userRepository.findAll();
+    }
 
     @Override
     public User saveUser(User user){
