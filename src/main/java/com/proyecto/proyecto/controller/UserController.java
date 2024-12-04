@@ -18,6 +18,7 @@ import com.proyecto.proyecto.model.User;
 import com.proyecto.proyecto.security.UserPrincipal;
 import com.proyecto.proyecto.service.UserService;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
@@ -51,4 +52,9 @@ public class UserController {
         return ResponseEntity.ok(userService.findAllUsers());
     }
     
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<Boolean> deleteUser(@PathVariable("id") Long id){
+        userService.deleteUser(id);
+        return ResponseEntity.ok(!(userService.findUserById(id).isPresent()));
+    }
 }

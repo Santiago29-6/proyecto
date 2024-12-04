@@ -36,7 +36,7 @@ public class PersonaController {
     @DeleteMapping(value = "delete/{id}")
     public ResponseEntity<Boolean> deletePersona(@PathVariable("id") Long id_persona){
         personaServiceImpl.deletePersonaById(id_persona);
-        return ResponseEntity.ok((personaServiceImpl.findPersonaById(id_persona) != null));
+        return ResponseEntity.ok(!(personaServiceImpl.findPersonaById(id_persona).isPresent()));
     }
 
 }

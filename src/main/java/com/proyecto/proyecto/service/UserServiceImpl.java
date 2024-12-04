@@ -66,4 +66,14 @@ public class UserServiceImpl implements UserService{
         user.setToken(jwt);
         return user;
     }
+
+    @Override
+    public void deleteUser(Long id){
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<User> findUserById(Long id) {
+        return userRepository.findById(id);
+    }
 }
