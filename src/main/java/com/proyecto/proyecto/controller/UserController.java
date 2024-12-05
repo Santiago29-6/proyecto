@@ -1,6 +1,7 @@
 package com.proyecto.proyecto.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,10 +30,22 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> saveUser(@RequestBody User user){
-        if(userService.findByUsername(user.getUsername()).isPresent()){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        
+        if (user.getId() != null) {
+            Optional<User> existingUser = userService.findUserById(user.getId());
+            if (existingUser.isPresent()) {
+                userService.saveUser(user);
+                return ResponseEntity.ok(user);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } else {
+            if (userService.findByUsername(user.getUsername()).isPresent()) {
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+            userService.saveUser(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body(user);
         }
-        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
     }
 
     @PutMapping("change/{role}")
