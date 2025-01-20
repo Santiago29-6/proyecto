@@ -17,20 +17,20 @@ public class Brand {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "registrationDate", nullable = false)
+    @Column(name = "registration_date", nullable = false, updatable = false)
     private LocalDateTime registrationDate;
 
-    @Column(name = "lastUpdated", nullable = false)
-    private LocalDateTime lastUpdated;
+    @Column(name = "last_updated", nullable = false)
+    private LocalDateTime lastUpdate;
 
     @PrePersist
     protected void onCreate() {
         registrationDate = LocalDateTime.now();
-        lastUpdated = LocalDateTime.now();
+        lastUpdate = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        lastUpdated = LocalDateTime.now();
+        lastUpdate = LocalDateTime.now();
     }
 }

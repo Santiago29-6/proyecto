@@ -1,32 +1,33 @@
-package com.proyecto.proyecto.service;
+package com.proyecto.proyecto.service.user;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.proyecto.proyecto.model.Role;
+import com.proyecto.proyecto.model.enums.*;
 import com.proyecto.proyecto.model.User;
 import com.proyecto.proyecto.repository.UserRepository;
-import com.proyecto.proyecto.security.jwt.JwtProvider;
+import com.proyecto.proyecto.security.jwt.JwtProviderImpl;
 
 import jakarta.transaction.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService{
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtProvider jwtProvider;
+    private final JwtProviderImpl jwtProviderImpl;
+
+    public UserServiceImpl (UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProviderImpl jwtProviderImpl) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtProviderImpl = jwtProviderImpl;
+    }
 
     @Override
     public List<User> findAllUsers(){
@@ -37,10 +38,9 @@ public class UserServiceImpl implements UserService{
     public User saveUser(User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(Role.USER);
-        user.setFechaRegistro(LocalDateTime.now());
         User userCreated = userRepository.save(user);
 
-        String jwt = jwtProvider.generateToken(userCreated);
+        String jwt = jwtProviderImpl.generateToken(userCreated);
         userCreated.setToken(jwt);
         
         return userCreated;
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("El usuario no existe: " + username));
         
-        String jwt = jwtProvider.generateToken(user);
+        String jwt = jwtProviderImpl.generateToken(user);
         user.setToken(jwt);
         return user;
     }

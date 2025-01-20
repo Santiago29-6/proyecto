@@ -1,4 +1,4 @@
-package com.proyecto.proyecto.service;
+package com.proyecto.proyecto.service.authentication;
 
 import com.proyecto.proyecto.model.AuthRequest;
 

@@ -1,6 +1,5 @@
-package com.proyecto.proyecto.service;
+package com.proyecto.proyecto.service.authentication;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,11 +13,14 @@ import com.proyecto.proyecto.security.jwt.JwtProvider;
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService{
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtProvider jwtProvider;
+    private final JwtProvider jwtProvider;
+
+    public AuthenticationServiceImpl (AuthenticationManager authenticationManager, JwtProvider jwtProvider) {
+        this.authenticationManager = authenticationManager;
+        this.jwtProvider = jwtProvider;
+    }
 
     @Override
     public String signInAndReturnJwt(AuthRequest signInRequest){

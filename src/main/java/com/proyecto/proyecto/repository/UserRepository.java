@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
-import com.proyecto.proyecto.model.Role;
+import com.proyecto.proyecto.model.enums.*;
 import com.proyecto.proyecto.model.User;
 
 import jakarta.transaction.Transactional;

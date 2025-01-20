@@ -3,7 +3,6 @@ package com.proyecto.proyecto.service.brand;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.proyecto.proyecto.model.Brand;
@@ -12,8 +11,11 @@ import com.proyecto.proyecto.repository.BrandRepository;
 @Service
 public class BrandServiceImpl implements BrandService {
 
-    @Autowired
-    private BrandRepository brandRepository;
+    private final BrandRepository brandRepository;
+
+    public BrandServiceImpl (BrandRepository brandRepository) {
+        this.brandRepository = brandRepository;
+    }
 
     @Override
     public List<Brand> findAll() {

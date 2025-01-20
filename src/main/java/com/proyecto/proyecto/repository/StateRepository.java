@@ -3,8 +3,8 @@ package com.proyecto.proyecto.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.proyecto.proyecto.model.Estado;
+import com.proyecto.proyecto.model.State;
 
 @Repository
-public interface EstadoRepository extends JpaRepository<Estado, Long>{
+public interface StateRepository extends JpaRepository<State, Long>{
 }

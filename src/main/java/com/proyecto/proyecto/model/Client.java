@@ -2,27 +2,17 @@ package com.proyecto.proyecto.model;
 
 import java.time.LocalDateTime;
 
-import com.proyecto.proyecto.model.enums.Role;
-
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
 
 @Data
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "users")
-public class User {
-    
+@Table(name = "client")
+public class Client {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    @Column(name = "username", nullable = false)
-    private String username;
-
-    @Column(name = "password", nullable = false)
-    private String password;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -30,11 +20,16 @@ public class User {
     @Column(name = "lastName", nullable = false)
     private String lastName;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name = "age", nullable = false)
+    private int age;
 
-    @Transient
-    private String token;
+    @ManyToOne
+    @JoinColumn(name = "id_country")
+    private Country pais;
+
+    @ManyToOne
+    @JoinColumn(name = "id_state")
+    private State state;
 
     @Column(name = "registration_date", nullable = false, updatable = false)
     private LocalDateTime registrationDate;
