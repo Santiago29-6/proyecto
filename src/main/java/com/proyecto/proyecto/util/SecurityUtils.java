@@ -7,6 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class SecurityUtils {
 
+    private SecurityUtils () {
+    }
+
     public static final String ROLE_PREFIX = "ROLE_";
     public static final String AUTH_HEADER = "authorization";
 

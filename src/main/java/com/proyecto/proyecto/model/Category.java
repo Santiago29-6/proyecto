@@ -17,7 +17,21 @@ public class Category {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "registrationDate")
+    @Column(name = "registration_date", nullable = false, updatable = false)
     private LocalDateTime registrationDate;
+
+    @Column(name = "last_updated", nullable = false)
+    private LocalDateTime lastUpdate;
+
+    @PrePersist
+    protected void onCreate(){
+        registrationDate = LocalDateTime.now();
+        lastUpdate = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate(){
+        lastUpdate = LocalDateTime.now();
+    }
     
 }

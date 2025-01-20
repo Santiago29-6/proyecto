@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,34 +15,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.proyecto.proyecto.model.Brand;
-import com.proyecto.proyecto.service.brand.BrandService;
+import com.proyecto.proyecto.service.brand.BrandServiceImpl;
 
 @RestController
-@RequestMapping("/brand/")
+@RequestMapping("/api")
 public class BrandController {
 
-    @Autowired
-    private BrandService brandService;
+    private final BrandServiceImpl brandServiceImpl;
 
-    @GetMapping
-    public ResponseEntity<List<Brand>> getAllBrands(){
-        return ResponseEntity.ok(brandService.findAll());
+    public BrandController (BrandServiceImpl brandServiceImpl){
+        this.brandServiceImpl = brandServiceImpl;
     }
 
-    @PostMapping("save")
+    @GetMapping("/brand")
+    public ResponseEntity<List<Brand>> getAllBrands(){
+        return ResponseEntity.ok(brandServiceImpl.findAll());
+    }
+
+    @PostMapping("/brand/save")
     public ResponseEntity<Brand> saveBrand(@RequestBody Brand brand) {
-        Brand brandCreated = brandService.saveBrand(brand);
+        Brand brandCreated = brandServiceImpl.saveBrand(brand);
         try {
-            return ResponseEntity.created(new URI("/brand/" + brandCreated.getId())).body(brandCreated);
+            return ResponseEntity.created(new URI("/api/brand/" + brandCreated.getId())).body(brandCreated);
         } catch (URISyntaxException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/brand/delete/{id}")
     public ResponseEntity<Boolean> deleteBrand(@PathVariable("id") Long id_brand){
-        brandService.deleteBrand(id_brand);
-        return ResponseEntity.ok(!(brandService.findBrandById(id_brand).isPresent()));
+        brandServiceImpl.deleteBrand(id_brand);
+        return ResponseEntity.ok(!(brandServiceImpl.findBrandById(id_brand).isPresent()));
     }
 
 

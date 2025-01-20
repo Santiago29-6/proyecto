@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import com.proyecto.proyecto.model.enums.State;
+
 @Data
 @Entity
 @Table(name = "product")
@@ -30,7 +32,7 @@ public class Product {
     private String sku;
 
     @Enumerated(EnumType.STRING)
-    private Estate estate;
+    private State state;
 
     @Column(name = "url_image")
     private String image;
@@ -43,20 +45,20 @@ public class Product {
     @JoinColumn(name = "id_category")
     private Category category;
 
-    @Column(name = "registrationDate", nullable = false)
+    @Column(name = "registration_date", nullable = false, updatable = false)
     private LocalDateTime registrationDate;
-    
-    @Column(name = "lastUpdated", nullable = false)
-    private LocalDateTime lastUpdated;  
+
+    @Column(name = "last_updated", nullable = false)
+    private LocalDateTime lastUpdate;  
 
     @PrePersist
     protected void onCreate() {
         registrationDate = LocalDateTime.now();
-        lastUpdated = LocalDateTime.now();
+        lastUpdate = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        lastUpdated = LocalDateTime.now();
+        lastUpdate = LocalDateTime.now();
     }
 }

@@ -6,14 +6,14 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "estado")
-public class Estado {
+public class State {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "id_pais")
-    private Pais pais;
-    private String nombre;
+    private Country pais;
+    private String name;
 
 }

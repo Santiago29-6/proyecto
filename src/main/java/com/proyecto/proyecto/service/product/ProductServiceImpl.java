@@ -3,7 +3,6 @@ package com.proyecto.proyecto.service.product;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.proyecto.proyecto.model.Product;
@@ -12,8 +11,11 @@ import com.proyecto.proyecto.repository.ProductRepository;
 @Service
 public class ProductServiceImpl implements ProductService{
 
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+
+    public ProductServiceImpl (ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
     @Override
     public List<Product> findAllProducts(){

@@ -6,11 +6,13 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "pais")
-public class Pais {
+public class Country {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String nombre;
+
+    @Column(name = "name")
+    private String name;
 
 }

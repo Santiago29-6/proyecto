@@ -14,18 +14,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.proyecto.proyecto.model.Role;
+import com.proyecto.proyecto.model.enums.*;
 import com.proyecto.proyecto.security.jwt.JwtAutorizationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private CustomUserDetailService customUserDetailService;
+    private final CustomUserDetailService customUserDetailService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
+    public SecurityConfig (CustomUserDetailService customUserDetailService, PasswordEncoder passwordEncoder) {
+        this.customUserDetailService = customUserDetailService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)

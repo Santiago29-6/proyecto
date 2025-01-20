@@ -4,40 +4,42 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.proyecto.proyecto.model.Product;
-import com.proyecto.proyecto.service.product.ProductService;
+import com.proyecto.proyecto.service.product.ProductServiceImpl;
 
 @RestController
-@RequestMapping("/product/")
+@RequestMapping("/api")
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+    private final ProductServiceImpl productServiceImpl;
 
-    @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts(){
-        return ResponseEntity.ok(productService.findAllProducts());
+    public ProductController (ProductServiceImpl productServiceImpl) {
+        this.productServiceImpl = productServiceImpl;
     }
 
-    @PostMapping("save")
+    @GetMapping("/product")
+    public ResponseEntity<List<Product>> getAllProducts(){
+        return ResponseEntity.ok(productServiceImpl.findAllProducts());
+    }
+
+    @PostMapping("/product/save")
     public ResponseEntity<Product> saveProduct(@RequestBody Product product) {
-        Product productSave = productService.saveProduct(product);
+        Product productSave = productServiceImpl.saveProduct(product);
         try {
-            return ResponseEntity.created(new URI("/product/" + productSave.getId())).body(productSave);
+            return ResponseEntity.created(new URI("/api/product/" + productSave.getId())).body(productSave);
         } catch (URISyntaxException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/product/delete/{id}")
     public ResponseEntity<Boolean> deleteProduct(@PathVariable("id") Long id_product){
-        productService.deleteProduct(id_product);
-        return ResponseEntity.ok(!(productService.findProductById(id_product).isPresent()));
+        productServiceImpl.deleteProduct(id_product);
+        return ResponseEntity.ok(!(productServiceImpl.findProductById(id_product).isPresent()));
     }
 
 }
