@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
-@RequestMapping("authentication")
+@RequestMapping("/api")
 public class AuthenticationController {
 
     private final AuthenticationServiceImpl authenticationServiceImpl;
@@ -28,15 +28,12 @@ public class AuthenticationController {
         this.userServiceImpl = userServiceImpl;
     }
 
-    @PostMapping("/sign-up")
+    @PostMapping("/authentication/sign-up")
     public ResponseEntity<User> signUp(@RequestBody User user) {
-        if(userServiceImpl.findByUsername(user.getUsername()).isPresent()){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
         return new ResponseEntity<>(userServiceImpl.saveUser(user), HttpStatus.CREATED);
     }
 
-    @PostMapping("/sign-in")
+    @PostMapping("/authentication/sign-in")
     public ResponseEntity<AuthResponse> signIn(@RequestBody AuthRequest authRequest) {
         String token = authenticationServiceImpl.signInAndReturnJwt(authRequest);
         return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);

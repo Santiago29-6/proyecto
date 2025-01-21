@@ -1,7 +1,6 @@
 package com.proyecto.proyecto.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,22 +42,9 @@ public class UserController {
 
     @PostMapping("/user/save")
     public ResponseEntity<User> saveUser(@RequestBody User user){
-        
-        if (user.getId() != null) {
-            Optional<User> existingUser = userServiceImpl.findUserById(user.getId());
-            if (existingUser.isPresent()) {
-                userServiceImpl.saveUser(user);
-                return ResponseEntity.ok(user);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } else {
-            if (userServiceImpl.findByUsername(user.getUsername()).isPresent()) {
-                return new ResponseEntity<>(HttpStatus.CONFLICT);
-            }
-            userServiceImpl.saveUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(user);
-        }
+        User savedUser = userServiceImpl.saveUser(user);
+        HttpStatus status = (user.getId() == null) ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(savedUser);
     }
 
     @PutMapping("/user/change/{role}")
@@ -70,7 +56,6 @@ public class UserController {
     
     @DeleteMapping("/user/delete/{id}")
     public ResponseEntity<Boolean> deleteUser(@PathVariable("id") Long id){
-        userServiceImpl.deleteUser(id);
-        return ResponseEntity.ok(!(userServiceImpl.findUserById(id).isPresent()));
+        return ResponseEntity.ok(userServiceImpl.deleteUser(id));
     }
 }

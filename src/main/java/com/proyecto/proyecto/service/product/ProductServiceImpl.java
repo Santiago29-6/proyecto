@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.proyecto.proyecto.exception.NotFoundException;
 import com.proyecto.proyecto.model.Product;
 import com.proyecto.proyecto.repository.ProductRepository;
 
@@ -24,16 +25,27 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public Optional<Product> findProductById(Long id){
-        return productRepository.findById(id);
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isPresent()) {
+            throw new NotFoundException("No se ha encontrado un producto con ese id: " + id);
+        }
+        return product;
     }
 
     @Override
-    public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
+    public boolean deleteProduct(Long id) {
+        if (findProductById(id).isEmpty()) {
+            productRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public Product saveProduct(Product product){
+        if (product.getId() != null) {
+            findProductById(product.getId());
+        }
         return productRepository.save(product);
     }
 }
