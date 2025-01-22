@@ -1,7 +1,5 @@
 package com.proyecto.proyecto.controller;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -29,17 +27,13 @@ public class ProductController {
     @PostMapping("/product/save")
     public ResponseEntity<Product> saveProduct(@RequestBody Product product) {
         Product productSave = productServiceImpl.saveProduct(product);
-        try {
-            return ResponseEntity.created(new URI("/api/product/" + productSave.getId())).body(productSave);
-        } catch (URISyntaxException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        HttpStatus status = (product.getId() ==  null) ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(productSave);
     }
 
     @DeleteMapping("/product/delete/{id}")
     public ResponseEntity<Boolean> deleteProduct(@PathVariable("id") Long id_product){
-        productServiceImpl.deleteProduct(id_product);
-        return ResponseEntity.ok(!(productServiceImpl.findProductById(id_product).isPresent()));
+        return ResponseEntity.ok(productServiceImpl.deleteProduct(id_product));
     }
 
 }
