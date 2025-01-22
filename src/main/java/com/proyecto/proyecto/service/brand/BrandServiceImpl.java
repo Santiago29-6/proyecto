@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.proyecto.proyecto.exception.NotFoundException;
 import com.proyecto.proyecto.model.Brand;
 import com.proyecto.proyecto.repository.BrandRepository;
 
@@ -13,7 +14,7 @@ public class BrandServiceImpl implements BrandService {
 
     private final BrandRepository brandRepository;
 
-    public BrandServiceImpl (BrandRepository brandRepository) {
+    public BrandServiceImpl(BrandRepository brandRepository) {
         this.brandRepository = brandRepository;
     }
 
@@ -23,18 +24,29 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
-    public Optional<Brand> findBrandById(Long id){
-        return brandRepository.findById(id);
+    public Optional<Brand> findBrandById(Long id_brand) {
+        Optional<Brand> brand = brandRepository.findById(id_brand);
+        if (brand.isEmpty()) {
+            throw new NotFoundException("No se ha encontrado una marca con ese id: " + id_brand);
+        }
+        return brand;
     }
 
     @Override
-    public Brand saveBrand(Brand brand){
+    public Brand saveBrand(Brand brand) {
+        if(brand.getId() != null) {
+            findBrandById(brand.getId());
+        }
         return brandRepository.save(brand);
     }
 
     @Override
-    public void deleteBrand(Long id_brand){
-        brandRepository.deleteById(id_brand);
+    public boolean deleteBrand(Long id_brand) {
+        if (findBrandById(id_brand).isPresent()) {
+            brandRepository.deleteById(id_brand);
+            return true;
+        }
+        return false;
     }
 
 }

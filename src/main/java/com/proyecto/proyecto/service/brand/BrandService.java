@@ -16,6 +16,6 @@ public interface BrandService {
 
     Brand saveBrand(Brand brand);
 
-    void deleteBrand(Long id);
+    boolean deleteBrand(Long id);
 
 }

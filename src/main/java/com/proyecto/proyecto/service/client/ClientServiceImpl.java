@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import com.proyecto.proyecto.exception.NotFoundException;
 import com.proyecto.proyecto.model.Client;
 import com.proyecto.proyecto.repository.ClientRepository;
 
@@ -29,8 +30,12 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void deleteClientById(Long id_client) {
-        clientRepository.deleteById(id_client);
+    public boolean deleteClientById(Long id_client) {
+        if (findClientById(id_client).isPresent()) {
+            clientRepository.deleteById(id_client);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -40,7 +45,12 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Optional<Client> findClientById(Long id_client) {
-        return clientRepository.findById(id_client);
+        Optional<Client> client = clientRepository.findById(id_client);
+        if (client.isPresent()){
+            throw new NotFoundException("No se ha encontrado un cliente con ese id: " + id_client);
+        }
+
+        return client;
     }
 
     @Override
