@@ -24,17 +24,17 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public Optional<Product> findProductById(Long id){
-        Optional<Product> product = productRepository.findById(id);
-        if (product.isPresent()) {
-            throw new NotFoundException("No se ha encontrado un producto con ese id: " + id);
+    public Optional<Product> findProductById(Long id_product){
+        Optional<Product> product = productRepository.findById(id_product);
+        if (product.isEmpty()) {
+            throw new NotFoundException("No se ha encontrado un producto con ese id: " + id_product);
         }
         return product;
     }
 
     @Override
     public boolean deleteProduct(Long id) {
-        if (findProductById(id).isEmpty()) {
+        if (findProductById(id).isPresent()) {
             productRepository.deleteById(id);
             return true;
         }

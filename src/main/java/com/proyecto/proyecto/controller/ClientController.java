@@ -37,8 +37,7 @@ public class ClientController {
 
     @DeleteMapping("/client/delete/{id}")
     public ResponseEntity<Boolean> deleteClient(@PathVariable("id") Long id_client){
-        clientServiceImpl.deleteClientById(id_client);
-        return ResponseEntity.ok(!(clientServiceImpl.findClientById(id_client).isPresent()));
+        return ResponseEntity.ok(clientServiceImpl.deleteClientById(id_client));
     }
 
 }

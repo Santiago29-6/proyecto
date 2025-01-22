@@ -1,11 +1,11 @@
 package com.proyecto.proyecto.service.category;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.proyecto.proyecto.exception.NotFoundException;
 import com.proyecto.proyecto.model.Category;
 import com.proyecto.proyecto.repository.CategoryRepository;
 
@@ -25,17 +25,27 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public Category saveCategory(Category category) {
-        category.setRegistrationDate(LocalDateTime.now());
+        if(category.getId() != null){
+            findCategoryById(category.getId());
+        }
         return categoryRepository.save(category);
     }
 
     @Override
-    public void deleteCategory(Long id_category) {
-        categoryRepository.deleteById(id_category);
+    public boolean deleteCategory(Long id_category) {
+        if (findCategoryById(id_category).isPresent()) {
+            categoryRepository.deleteById(id_category);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public Optional<Category> findCategoryById(Long id_category) {
-        return categoryRepository.findById(id_category);
+        Optional<Category> category = categoryRepository.findById(id_category);
+        if(category.isEmpty()) {
+            throw new NotFoundException("No se ha encontrado una categoría con ese id: " + id_category);
+        }
+        return category;
     }
 }

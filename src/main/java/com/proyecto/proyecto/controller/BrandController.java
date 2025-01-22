@@ -1,7 +1,5 @@
 package com.proyecto.proyecto.controller;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -35,11 +33,8 @@ public class BrandController {
     @PostMapping("/brand/save")
     public ResponseEntity<Brand> saveBrand(@RequestBody Brand brand) {
         Brand brandCreated = brandServiceImpl.saveBrand(brand);
-        try {
-            return ResponseEntity.created(new URI("/api/brand/" + brandCreated.getId())).body(brandCreated);
-        } catch (URISyntaxException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        HttpStatus status = (brand.getId() == null) ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(brandCreated);
     }
 
     @DeleteMapping("/brand/delete/{id}")
@@ -47,6 +42,5 @@ public class BrandController {
         brandServiceImpl.deleteBrand(id_brand);
         return ResponseEntity.ok(!(brandServiceImpl.findBrandById(id_brand).isPresent()));
     }
-
 
 }
