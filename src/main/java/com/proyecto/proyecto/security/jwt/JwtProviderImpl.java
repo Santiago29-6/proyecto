@@ -25,8 +25,8 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Component
-public class JwtProviderImpl implements JwtProvider{
-    
+public class JwtProviderImpl implements JwtProvider {
+
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
@@ -38,54 +38,54 @@ public class JwtProviderImpl implements JwtProvider{
 
     @Override
     public String generateToken(UserPrincipal auth) {
-    String authorities = auth.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(","));
+        String authorities = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
-    Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-    long expirationInMs = Long.parseLong(jwtExpirationInMs);
+        Key key = Keys.hmacShaKeyFor(this.jwtSecret.getBytes(StandardCharsets.UTF_8));
+        long expirationInMs = Long.parseLong(jwtExpirationInMs);
 
-    return Jwts.builder()
-            .setSubject(auth.getUsername())
-            .claim(CLAIM_ROLES, authorities)
-            .claim(CLAIM_USER_ID, auth.getId())
-            .setExpiration(new Date(System.currentTimeMillis() + expirationInMs))
-            .signWith(key, SignatureAlgorithm.HS512)
-            .compact();
+        return Jwts.builder()
+                .setSubject(auth.getUsername())
+                .claim(CLAIM_ROLES, authorities)
+                .claim(CLAIM_USER_ID, auth.getId())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationInMs))
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
     }
 
     @Override
-    public String generateToken(User user){
-        Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    public String generateToken(User user) {
+        Key key = Keys.hmacShaKeyFor(this.jwtSecret.getBytes(StandardCharsets.UTF_8));
         long expirationInMs = Long.parseLong(jwtExpirationInMs);
         return Jwts.builder()
-        .setSubject(user.getUsername())
-        .claim(CLAIM_ROLES, user.getRole())
-        .claim(CLAIM_USER_ID, user.getId())
-        .setExpiration(new Date(System.currentTimeMillis() + expirationInMs))
-        .signWith(key, SignatureAlgorithm.HS512)
-        .compact();
+                .setSubject(user.getUsername())
+                .claim(CLAIM_ROLES, user.getRole())
+                .claim(CLAIM_USER_ID, user.getId())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationInMs))
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
     }
 
     @Override
-    public Authentication getAuthentication(HttpServletRequest request){
+    public Authentication getAuthentication(HttpServletRequest request) {
         Claims claims = extractClaims(request);
-        if (claims == null){
+        if (claims == null) {
             return null;
         }
         String username = claims.getSubject();
         Long userId = claims.get(CLAIM_USER_ID, Long.class);
         Set<GrantedAuthority> authorities = Arrays.stream(claims.get(CLAIM_ROLES).toString().split(","))
-            .map(SecurityUtils::convertToAuthority)
-            .collect(Collectors.toSet());
-        
-        UserDetails userDetails = UserPrincipal.builder()
-        .username(username)
-        .authorities(authorities)
-        .id(userId)
-        .build();
+                .map(SecurityUtils::convertToAuthority)
+                .collect(Collectors.toSet());
 
-        if(username == null){
+        UserDetails userDetails = UserPrincipal.builder()
+                .username(username)
+                .authorities(authorities)
+                .id(userId)
+                .build();
+
+        if (username == null) {
             return null;
         }
 
@@ -94,21 +94,21 @@ public class JwtProviderImpl implements JwtProvider{
     }
 
     @Override
-    public boolean isTokenValid(HttpServletRequest request){
+    public boolean isTokenValid(HttpServletRequest request) {
         Claims claims = extractClaims(request);
         return claims != null && !claims.getExpiration().before(new Date());
     }
 
-    private Claims extractClaims(HttpServletRequest request){
+    private Claims extractClaims(HttpServletRequest request) {
         String token = SecurityUtils.extractAuthTokenFromRequest(request);
-        if(token == null){
+        if (token == null) {
             return null;
         }
 
-        Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        Key key = Keys.hmacShaKeyFor(this.jwtSecret.getBytes(StandardCharsets.UTF_8));
         return Jwts.parser().setSigningKey(key)
-        .build()
-        .parseClaimsJws(token)
-        .getBody();
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

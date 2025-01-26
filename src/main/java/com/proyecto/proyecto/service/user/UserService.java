@@ -25,4 +25,6 @@ public interface UserService {
 
     Optional<User> findUserById(Long id);
 
+    Optional<User> checkIfUsernameExists(String username);
+
 }

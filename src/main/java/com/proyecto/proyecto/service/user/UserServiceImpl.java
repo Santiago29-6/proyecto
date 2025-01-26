@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
         if (user.getId() != null) {
             findUserById(user.getId());
         } else {
-            findByUsername(user.getUsername());
+            checkIfUsernameExists(user.getUsername());
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -56,12 +56,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findByUsername(String username) {
+    public Optional<User> checkIfUsernameExists(String username) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
             throw new UsernameAlreadyExistsException("El nombre de usuario ya está en uso: " + username);
         }
         return user;
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     @Transactional
