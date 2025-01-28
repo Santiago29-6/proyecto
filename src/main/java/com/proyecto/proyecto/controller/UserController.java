@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.proyecto.proyecto.model.enums.*;
+import com.proyecto.proyecto.enums.*;
 import com.proyecto.proyecto.model.User;
 import com.proyecto.proyecto.security.UserPrincipal;
 import com.proyecto.proyecto.service.user.UserServiceImpl;

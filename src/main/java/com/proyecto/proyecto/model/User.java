@@ -2,7 +2,7 @@ package com.proyecto.proyecto.model;
 
 import java.time.LocalDateTime;
 
-import com.proyecto.proyecto.model.enums.Role;
+import com.proyecto.proyecto.enums.Role;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.proyecto.proyecto.constant.Message;
 import com.proyecto.proyecto.exception.NotFoundException;
 import com.proyecto.proyecto.model.Category;
 import com.proyecto.proyecto.repository.CategoryRepository;
@@ -44,7 +45,7 @@ public class CategoryServiceImpl implements CategoryService{
     public Optional<Category> findCategoryById(Long id_category) {
         Optional<Category> category = categoryRepository.findById(id_category);
         if(category.isEmpty()) {
-            throw new NotFoundException("No se ha encontrado una categoría con ese id: " + id_category);
+            throw new NotFoundException(String.format(Message.CATEGORY_NOT_FOUND, id_category));
         }
         return category;
     }

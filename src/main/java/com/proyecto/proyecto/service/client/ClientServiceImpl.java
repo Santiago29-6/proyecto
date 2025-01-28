@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import com.proyecto.proyecto.constant.Message;
 import com.proyecto.proyecto.exception.NotFoundException;
 import com.proyecto.proyecto.model.Client;
 import com.proyecto.proyecto.repository.ClientRepository;
@@ -47,7 +48,7 @@ public class ClientServiceImpl implements ClientService {
     public Optional<Client> findClientById(Long id_client) {
         Optional<Client> client = clientRepository.findById(id_client);
         if (client.isPresent()){
-            throw new NotFoundException("No se ha encontrado un cliente con ese id: " + id_client);
+            throw new NotFoundException(String.format(Message.CLIENT_NOT_FOUND, id_client));
         }
 
         return client;

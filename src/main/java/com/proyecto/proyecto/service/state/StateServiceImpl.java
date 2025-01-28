@@ -18,7 +18,7 @@ public class StateServiceImpl implements StateService{
     }
 
     @Override
-    public List<State> findAllStateOfPais(Long paisId){
+    public List<State> findAllStateOfCountry(Long paisId){
         List<State> responseStates = new ArrayList<>();
         List<State> estados = stateRepository.findAll();
         for(int i = 0; i < estados.size(); i++){
