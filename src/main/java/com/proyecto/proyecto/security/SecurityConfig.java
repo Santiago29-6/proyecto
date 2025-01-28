@@ -14,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.proyecto.proyecto.model.enums.*;
+import com.proyecto.proyecto.enums.*;
 import com.proyecto.proyecto.security.jwt.JwtAutorizationFilter;
 
 @Configuration

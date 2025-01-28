@@ -25,7 +25,7 @@ public class StateContoller {
 
     @GetMapping("/state/{id}")
     public ResponseEntity<List<State>> getAllEstadoByPais(@PathVariable("id") Long idPais) {
-        return ResponseEntity.ok(stateServiceImpl.findAllStateOfPais(idPais));
+        return ResponseEntity.ok(stateServiceImpl.findAllStateOfCountry(idPais));
     }
     
 }

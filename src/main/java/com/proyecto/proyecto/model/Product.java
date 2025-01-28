@@ -2,10 +2,10 @@ package com.proyecto.proyecto.model;
 
 import java.time.LocalDateTime;
 
+import com.proyecto.proyecto.enums.State;
+
 import jakarta.persistence.*;
 import lombok.Data;
-
-import com.proyecto.proyecto.model.enums.State;
 
 @Data
 @Entity

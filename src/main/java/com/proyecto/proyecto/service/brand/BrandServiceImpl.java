@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.proyecto.proyecto.constant.Message;
 import com.proyecto.proyecto.exception.NotFoundException;
 import com.proyecto.proyecto.model.Brand;
 import com.proyecto.proyecto.repository.BrandRepository;
@@ -27,7 +28,7 @@ public class BrandServiceImpl implements BrandService {
     public Optional<Brand> findBrandById(Long id_brand) {
         Optional<Brand> brand = brandRepository.findById(id_brand);
         if (brand.isEmpty()) {
-            throw new NotFoundException("No se ha encontrado una marca con ese id: " + id_brand);
+            throw new NotFoundException(String.format(Message.BRAND_NOT_FOUND, id_brand));
         }
         return brand;
     }

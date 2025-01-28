@@ -8,5 +8,7 @@ import com.proyecto.proyecto.model.State;
 
 @Service
 public interface StateService{
-	List<State> findAllStateOfPais(Long paisId);
+
+	List<State> findAllStateOfCountry(Long paisId);
+	
 }
