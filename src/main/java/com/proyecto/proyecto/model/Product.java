@@ -26,7 +26,7 @@ public class Product {
     private Long price;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "sku", nullable = false, unique = true)
     private String sku;
