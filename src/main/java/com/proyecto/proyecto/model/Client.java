@@ -21,7 +21,7 @@ public class Client {
     private String lastName;
 
     @Column(name = "age", nullable = false)
-    private int age;
+    private Integer age;
 
     @ManyToOne
     @JoinColumn(name = "id_country")
