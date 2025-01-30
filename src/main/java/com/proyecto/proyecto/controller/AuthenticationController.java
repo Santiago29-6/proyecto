@@ -5,9 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.proyecto.proyecto.model.AuthRequest;
-import com.proyecto.proyecto.model.AuthResponse;
-import com.proyecto.proyecto.model.User;
+import com.proyecto.proyecto.dto.request.AuthRequestDTO;
+import com.proyecto.proyecto.dto.request.UserRequestDTO;
+import com.proyecto.proyecto.dto.response.AuthResponseDTO;
+import com.proyecto.proyecto.dto.response.UserResponseDTO;
 import com.proyecto.proyecto.service.authentication.AuthenticationServiceImpl;
 import com.proyecto.proyecto.service.user.UserServiceImpl;
 
@@ -29,13 +30,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authentication/sign-up")
-    public ResponseEntity<User> signUp(@RequestBody User user) {
-        return new ResponseEntity<>(userServiceImpl.saveUser(user), HttpStatus.CREATED);
+    public ResponseEntity<UserResponseDTO> signUp(@RequestBody UserRequestDTO userRequestDTO) {
+        return new ResponseEntity<>(userServiceImpl.saveUser(userRequestDTO), HttpStatus.CREATED);
     }
 
     @PostMapping("/authentication/sign-in")
-    public ResponseEntity<AuthResponse> signIn(@RequestBody AuthRequest authRequest) {
-        String token = authenticationServiceImpl.signInAndReturnJwt(authRequest);
-        return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);
+    public ResponseEntity<AuthResponseDTO> signIn(@RequestBody AuthRequestDTO authRequestDTO) {
+        return new ResponseEntity<>(authenticationServiceImpl.signInAndReturnJwt(authRequestDTO), HttpStatus.OK);
     }
 }

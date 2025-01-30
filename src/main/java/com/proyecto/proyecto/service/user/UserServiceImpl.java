@@ -7,13 +7,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.proyecto.proyecto.constant.Message;
+import com.proyecto.proyecto.dto.request.UserRequestDTO;
+import com.proyecto.proyecto.dto.response.UserResponseDTO;
 import com.proyecto.proyecto.enums.*;
 import com.proyecto.proyecto.exception.NotFoundException;
 import com.proyecto.proyecto.exception.UsernameAlreadyExistsException;
 import com.proyecto.proyecto.model.User;
 import com.proyecto.proyecto.repository.UserRepository;
-import com.proyecto.proyecto.security.jwt.JwtProviderImpl;
 
 import jakarta.transaction.Transactional;
 
@@ -24,22 +26,28 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final JwtProviderImpl jwtProviderImpl;
+    private final ObjectMapper objectMapper;
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            JwtProviderImpl jwtProviderImpl) {
+            ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtProviderImpl = jwtProviderImpl;
+        this.objectMapper = objectMapper;
     }
 
     @Override
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> findAllUsers() {
+        List<User> users = userRepository.findAll();
+
+        return users.stream()
+            .map(u -> objectMapper.convertValue(u, UserResponseDTO.class))
+            .toList();
     }
 
     @Override
-    public User saveUser(User user) {
+    public UserResponseDTO saveUser(UserRequestDTO userRequestDTO) {
+
+        User user = objectMapper.convertValue(userRequestDTO, User.class);
 
         if (user.getId() != null) {
             findUserById(user.getId());
@@ -53,7 +61,7 @@ public class UserServiceImpl implements UserService {
             user.setRole(Role.USER);
         }
 
-        return userRepository.save(user);
+        return objectMapper.convertValue(userRepository.save(user), UserResponseDTO.class);
     }
 
     @Override
@@ -77,15 +85,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUsernameReturnToken(String username) {
+    public UserResponseDTO findByUsernameReturnToken(String username) {
         User user = userRepository.findByUsername(username)
-            .orElseThrow(
-                () -> new UsernameNotFoundException(String.format(Message.USERNAME_NOT_FOUND, username))
-            );
-
-        String jwt = jwtProviderImpl.generateToken(user);
-        user.setToken(jwt);
-        return user;
+                .orElseThrow(
+                    () -> new UsernameNotFoundException(String.format(Message.USERNAME_NOT_FOUND, username))
+                );
+        
+        return objectMapper.convertValue(user, UserResponseDTO.class);
     }
 
     @Override
