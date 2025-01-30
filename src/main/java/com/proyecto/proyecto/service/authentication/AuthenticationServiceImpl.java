@@ -5,7 +5,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.proyecto.proyecto.dto.request.AuthRequestDTO;
+import com.proyecto.proyecto.dto.response.AuthResponseDTO;
 import com.proyecto.proyecto.model.AuthRequest;
+import com.proyecto.proyecto.model.AuthResponse;
 import com.proyecto.proyecto.model.User;
 import com.proyecto.proyecto.security.UserPrincipal;
 import com.proyecto.proyecto.security.jwt.JwtProvider;
@@ -17,23 +21,28 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 
     private final JwtProvider jwtProvider;
 
-    public AuthenticationServiceImpl (AuthenticationManager authenticationManager, JwtProvider jwtProvider) {
+    private final ObjectMapper objectMapper;
+
+    public AuthenticationServiceImpl (AuthenticationManager authenticationManager, JwtProvider jwtProvider, ObjectMapper objectMapper) {
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
+        this.objectMapper = objectMapper;
     }
 
     @Override
-    public String signInAndReturnJwt(AuthRequest signInRequest){
+    public AuthResponseDTO signInAndReturnJwt(AuthRequestDTO authRequestDTO){
+        AuthRequest authRequest = objectMapper.convertValue(authRequestDTO, AuthRequest.class);
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword())
+            new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
 
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        String jwt = jwtProvider.generateToken(userPrincipal);
+        
+        AuthResponse authResponse = new AuthResponse(jwtProvider.generateToken(userPrincipal));
 
         User singInUser = userPrincipal.getUser();
-        singInUser.setToken(jwt);
+        singInUser.setToken(authResponse.getToken());
 
-        return jwt;
+        return objectMapper.convertValue(authResponse, AuthResponseDTO.class);
     } 
 }

@@ -5,21 +5,23 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.proyecto.proyecto.dto.request.UserRequestDTO;
+import com.proyecto.proyecto.dto.response.UserResponseDTO;
 import com.proyecto.proyecto.enums.*;
 import com.proyecto.proyecto.model.User;
 
 @Service
 public interface UserService {
 
-    User saveUser(User user);
+    UserResponseDTO saveUser(UserRequestDTO userRequestDTO);
 
     Optional<User> findByUsername(String username);
 
     void changeRole(Role newRole, String username);
 
-    User findByUsernameReturnToken(String username);
+    UserResponseDTO findByUsernameReturnToken(String username);
 
-    List<User> findAllUsers();
+    List<UserResponseDTO> findAllUsers();
 
     boolean deleteUser(Long id);
 

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.proyecto.proyecto.dto.request.UserRequestDTO;
+import com.proyecto.proyecto.dto.response.UserResponseDTO;
 import com.proyecto.proyecto.enums.*;
 import com.proyecto.proyecto.model.User;
 import com.proyecto.proyecto.security.UserPrincipal;
@@ -31,20 +33,19 @@ public class UserController {
     }
 
     @GetMapping("/user/me")
-    public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<UserResponseDTO> getCurrentUser(@AuthenticationPrincipal UserPrincipal userPrincipal){
         return new ResponseEntity<>(userServiceImpl.findByUsernameReturnToken(userPrincipal.getUsername()), HttpStatus.OK);
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<User>> getAllUser(){
+    public ResponseEntity<List<UserResponseDTO>> getAllUser(){
         return ResponseEntity.ok(userServiceImpl.findAllUsers());
     }
 
     @PostMapping("/user/save")
-    public ResponseEntity<User> saveUser(@RequestBody User user){
-        User savedUser = userServiceImpl.saveUser(user);
-        HttpStatus status = (user.getId() == null) ? HttpStatus.CREATED : HttpStatus.OK;
-        return ResponseEntity.status(status).body(savedUser);
+    public ResponseEntity<UserResponseDTO> saveUser(@RequestBody UserRequestDTO userRequestDTO){
+        HttpStatus status = (userRequestDTO.getIdDTO() == null) ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(userServiceImpl.saveUser(userRequestDTO));
     }
 
     @PutMapping("/user/change/{role}")

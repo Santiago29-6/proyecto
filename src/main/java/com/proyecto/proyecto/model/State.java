@@ -11,9 +11,11 @@ public class State {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "id_pais")
     private Country pais;
+    
     private String name;
 
 }
