@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.proyecto.proyecto.dto.request.UserRequestDTO;
 import com.proyecto.proyecto.dto.response.UserResponseDTO;
 import com.proyecto.proyecto.enums.*;
-import com.proyecto.proyecto.model.User;
 import com.proyecto.proyecto.security.UserPrincipal;
 import com.proyecto.proyecto.service.user.UserServiceImpl;
 

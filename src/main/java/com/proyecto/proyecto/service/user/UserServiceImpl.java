@@ -65,17 +65,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> checkIfUsernameExists(String username) {
-        Optional<User> user = userRepository.findByUsername(username);
-        if (user.isPresent()) {
-            throw new UsernameAlreadyExistsException(String.format(Message.USERNAME_ALREADY_EXIST, username));
-        }
-        return user;
+    public UserResponseDTO checkIfUsernameExists(String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(
+                () -> new UsernameAlreadyExistsException(String.format(Message.USERNAME_ALREADY_EXIST, username))
+            );
+        UserResponseDTO userResponseDTO = objectMapper.convertValue(user, UserResponseDTO.class);
+        return userResponseDTO;
     }
 
     @Override
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public UserResponseDTO findByUsername(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+
+        return objectMapper.convertValue(user.get(), UserResponseDTO.class);
     }
 
     @Transactional
@@ -95,20 +98,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean deleteUser(Long id) {
-        if (userRepository.findById(id).isPresent()) {
-            userRepository.deleteById(id);
+    public boolean deleteUser(Long id_user) {
+        if (userRepository.findById(id_user).isPresent()) {
+            userRepository.deleteById(id_user);
             return true;
         }
         return false;
     }
 
     @Override
-    public Optional<User> findUserById(Long id_user) {
+    public UserResponseDTO findUserById(Long id_user) {
         Optional<User> user = userRepository.findById(id_user);
         if (user.isEmpty()) {
             throw new NotFoundException(String.format(Message.USER_NOT_FOUND, id_user));
         }
-        return user;
+        return objectMapper.convertValue(user.get(), UserResponseDTO.class);
     }
 }
