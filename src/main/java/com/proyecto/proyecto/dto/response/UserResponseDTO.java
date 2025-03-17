@@ -15,13 +15,13 @@ public class UserResponseDTO {
 
     private Long idDTO;
 
-    private String usernameDTO;
-
-    private String passwordDTO;
-
     private String nameDTO;
 
     private String lastNameDTO;
+
+    private String usernameDTO;
+
+    private String passwordDTO;
 
     private Role roleDTO;
 

@@ -1,8 +1,5 @@
 package com.proyecto.proyecto.dto.request;
 
-import com.proyecto.proyecto.dto.response.CountryResponseDTO;
-import com.proyecto.proyecto.dto.response.StateResponseDTO;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,8 +17,8 @@ public class ClientRequestDTO {
 
     private Integer ageDTO;
 
-    private CountryResponseDTO countryDTO;
+    private CountryRequestDTO countryDTO;
 
-    private StateResponseDTO stateDTO;
+    private StateRequestDTO stateDTO;
 
 }

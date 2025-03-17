@@ -1,7 +1,5 @@
 package com.proyecto.proyecto.dto.request;
 
-import com.proyecto.proyecto.dto.response.BrandResponseDTO;
-import com.proyecto.proyecto.dto.response.CategoryResponseDTO;
 import com.proyecto.proyecto.enums.State;
 
 import lombok.AllArgsConstructor;
@@ -29,8 +27,8 @@ public class ProductRequestDTO {
 
     private String imageDTO;
 
-    private BrandResponseDTO brandDTO;
+    private BrandRequestDTO brandDTO;
 
-    private CategoryResponseDTO categoryDTO;
+    private CategoryRequestDTO categoryDTO;
 
 }
