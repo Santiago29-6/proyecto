@@ -14,5 +14,7 @@ public class StateResponseDTO {
     private Long idDTO;
     
     private String nameDTO;
+
+    private CountryResponseDTO countryDTO;
     
 }
