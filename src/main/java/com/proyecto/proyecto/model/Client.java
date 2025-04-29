@@ -25,7 +25,7 @@ public class Client {
 
     @ManyToOne
     @JoinColumn(name = "id_country")
-    private Country pais;
+    private Country country;
 
     @ManyToOne
     @JoinColumn(name = "id_state")
