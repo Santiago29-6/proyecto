@@ -9,18 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class ClientRequestDTO {
+public class StateRequestDTO {
 
     private Long idDTO;
-
-    private String nameDTO;
-
-    private String lastNameDTO;
-
-    private Integer ageDTO;
-
-    private CountryRequestDTO countryDTO;
-
-    private StateRequestDTO stateDTO;
 
 }
