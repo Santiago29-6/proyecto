@@ -13,29 +13,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get branch name
-        id: get_branch
+      - name: Get branch name (pull_request or push)
+        id: extract_branch
         env:
           EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
           HEAD_REF: ${{ github.head_ref }}
-          REF: ${{ github.ref }}
         run: |
           if [[ "$EVENT_NAME" == "pull_request" ]]; then
-            BRANCH_NAME="$HEAD_REF"
-            BRANCH_NAME1="${REF#refs/heads/}"
+            echo "branch_name=$HEAD_REF" >> "$GITHUB_OUTPUT"
+          else
+            echo "branch_name=${GITHUB_REF#refs/heads/}" >> "$GITHUB_OUTPUT"
           fi
-          echo "Branch name detected: $BRANCH_NAME"
-          echo "Branch name detected: $BRANCH_NAME1"
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
-      - name: Validate branch name
+      - name: Validate branch name format
         run: |
-          BRANCH_NAME="${{ steps.get_branch.outputs.branch_name }}"
-          echo "Validating branch name: $BRANCH_NAME"
+          BRANCH_NAME="${{ steps.extract_branch.outputs.branch_name }}"
+          echo "Branch name: $BRANCH_NAME"
           if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|release|refactor)/.+$ ]]; then
-            echo "❌ Invalid branch name: '$BRANCH_NAME'"
-            echo "Branch name must start with one of the following prefixes: feature/, bugfix/, hotfix/, release/, or refactor/"
+            echo "❌ Invalid branch name: $BRANCH_NAME"
             exit 1
           else
-            echo "✅ Branch name is valid."
+            echo "✅ Valid branch name: $BRANCH_NAME"
           fi
