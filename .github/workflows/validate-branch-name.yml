@@ -22,10 +22,10 @@ jobs:
         run: |
           if [[ "$EVENT_NAME" == "pull_request" ]]; then
             BRANCH_NAME="$HEAD_REF"
-          else
-            BRANCH_NAME="${REF#refs/heads/}"
+            BRANCH_NAME1="${REF#refs/heads/}"
           fi
           echo "Branch name detected: $BRANCH_NAME"
+          echo "Branch name detected: $BRANCH_NAME1"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Validate branch name
