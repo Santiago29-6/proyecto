@@ -12,9 +12,6 @@ jobs:
   validate-branch:
     runs-on: ubuntu-latest
 
-    outputs:
-      branch_name: ${{ steps.get_branch.outputs.branch_name }}
-
     steps:
       - name: Debug event and refs
         run: |
@@ -25,11 +22,15 @@ jobs:
 
       - name: Get branch name
         id: get_branch
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          REF: ${{ github.ref }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "branch_name=${{ github.head_ref }}" >> "$GITHUB_OUTPUT"
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            echo "branch_name=$HEAD_REF" >> $GITHUB_OUTPUT
           else
-            echo "branch_name=${GITHUB_REF#refs/heads/}" >> "$GITHUB_OUTPUT"
+            echo "branch_name=${REF#refs/heads/}" >> $GITHUB_OUTPUT
           fi
 
       - name: Validate branch name
