@@ -21,22 +21,35 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Extract PR title
+      - name: Validate PR title and extract change type
         id: pr
         run: |
           TITLE="${{ github.event.pull_request.title }}"
-          echo "🔍 PR title: $TITLE"
+          echo "📌 PR title: $TITLE"
 
-          if echo "$TITLE" | grep -Eiq "^(release|refactor|test)"; then
+          # Validar formato: 000 (tipo): descripción
+          if [[ ! "$TITLE" =~ ^[0-9]{3}\ \((feat|fix|refactor|test|hotfix)\):\ .+ ]]; then
+            echo "❌ ERROR: PR title format is invalid."
+            echo "Expected format: '000 (feat|fix|refactor|test|hotfix): Description'"
+            exit 1
+          fi
+
+          # Extraer tipo de cambio entre paréntesis
+          TYPE=$(echo "$TITLE" | sed -nE 's/^[0-9]{3} \(([^)]+)\):.*/\1/p')
+          echo "🔍 Detected type: $TYPE"
+
+          # Determinar tipo de cambio
+          if echo "$TYPE" | grep -Eiq "^(feat|refactor|test)$"; then
             echo "CHANGE_TYPE=minor" >> "$GITHUB_OUTPUT"
-          elif echo "$TITLE" | grep -Eiq "^(bugfix|hotfix)"; then
+          elif echo "$TYPE" | grep -Eiq "^(fix|hotfix)$"; then
             echo "CHANGE_TYPE=patch" >> "$GITHUB_OUTPUT"
           else
             echo "CHANGE_TYPE=none" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Stop if not a release-type PR
+      - name: Stop if not a release-related PR
         if: steps.pr.outputs.CHANGE_TYPE == 'none'
-        run: echo "ℹ️ Not a release-related PR. Skipping workflow."
+        run: echo "ℹ️ PR is not related to a release. Skipping workflow."
 
       - name: Get current version from pom.xml
         id: version
@@ -46,7 +59,7 @@ jobs:
           BASE_VERSION=$(echo "$FULL_VERSION" | sed 's/-SNAPSHOT//')
           echo "VERSION=$BASE_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Calculate next versions
+      - name: Calculate new versions
         id: next
         if: steps.pr.outputs.CHANGE_TYPE != 'none'
         run: |
@@ -68,7 +81,7 @@ jobs:
       - name: Debug versions
         run: |
           echo "📦 Release version: ${{ steps.next.outputs.RELEASE_VERSION }}"
-          echo "🔧 Next snapshot: ${{ steps.next.outputs.NEXT_VERSION }}"
+          echo "🔧 Next main version: ${{ steps.next.outputs.NEXT_VERSION }}"
 
       - name: Create release branch and tag
         if: steps.pr.outputs.CHANGE_TYPE != 'none'
