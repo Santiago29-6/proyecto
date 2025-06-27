@@ -15,15 +15,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get and validate commit messages
         run: |
           echo "🔍 Getting commit messages..."
-          
-          # Get list of all commits between base and head
+
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            git fetch origin ${{ github.event.pull_request.base.ref }}
-            COMMITS=$(git log --pretty=%s origin/${{ github.event.pull_request.base.ref }}..HEAD)
+            BASE_BRANCH=${{ github.event.pull_request.base.ref }}
+            git fetch origin "$BASE_BRANCH"
+            COMMITS=$(git log --pretty=%s origin/$BASE_BRANCH..HEAD)
           else
             COMMITS=$(git log --pretty=%s ${{ github.event.before }}..${{ github.sha }})
           fi
@@ -36,7 +38,7 @@ jobs:
               continue
             fi
 
-            if [[ ! "$COMMIT_MESSAGE" =~ ^[0-9]{3}\ \((feat|fix|test|chore|refactor|docs)\):\ .+ ]]; then
+            if [[ ! "$COMMIT_MESSAGE" =~ ^[0-9]{3}\ \((feat|fix|test|refactor)\):\ .+ ]]; then
               echo "❌ Invalid commit message: '$COMMIT_MESSAGE'"
               echo "✅ Expected format: 'NNN (type): descriptive message'"
               echo "🔒 Push has been blocked."
