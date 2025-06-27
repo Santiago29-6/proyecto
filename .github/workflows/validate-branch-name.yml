@@ -13,6 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Debug event and refs
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "github.ref_name: ${{ github.ref_name }}"
+          echo "github.head_ref: ${{ github.head_ref }}"
+
       - name: Get branch name
         id: get_branch
         run: |
@@ -30,4 +37,6 @@ jobs:
             echo "❌ Invalid branch name: '$BRANCH_NAME'"
             echo "Branch name must start with one of the following prefixes: feature/, bugfix/, hotfix/, release/, or refactor/"
             exit 1
+          else
+            echo "✅ Branch name is valid."
           fi
