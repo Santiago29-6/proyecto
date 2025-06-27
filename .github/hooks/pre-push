@@ -1,14 +1,10 @@
-#!/bin/bash
 
-# Regex pattern for valid commit messages
-VALID_PATTERN='^[0-9]{3} \((feat|fix|test|refactor|chore|docs)\): .+$'
+VALID_PATTERN='^[0-9]{3} \((feat|fix|test|refactor)\): .+$'
 
 while read local_ref local_sha remote_ref remote_sha
 do
-  # Get target branch name
   branch=$(echo "$remote_ref" | sed 's|refs/heads/||')
 
-  # Determine the commit range
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
     range=$local_sha
   else
