@@ -2,11 +2,16 @@ name: Validate all commit messages
 
 on:
   push:
-    branches:
+    branches-ignore:
+      - main
+      - release/**
+    tags-ignore:
       - '**'
   pull_request:
-    branches:
-      - '**'
+    branches-ignore:
+      - main
+      - release/**
+
 
 jobs:
   validate-commit-messages:
