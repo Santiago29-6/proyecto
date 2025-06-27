@@ -56,7 +56,7 @@ jobs:
               continue
             fi
 
-            if [[ ! "$COMMIT_MESSAGE" =~ ^[0-9]{3}\ \((feat|fix|test|refactor)\):\ .+ ]]; then
+            if [[ ! "$COMMIT_MESSAGE" =~ ^[0-9]{3}\ \((feat|fix|test|refactor|hotfix)\):\ .+ ]]; then
               echo "❌ Invalid commit message: '$COMMIT_MESSAGE'"
               echo "✅ Expected format: 'NNN (type): descriptive message'"
               echo "🔒 Push has been blocked."
