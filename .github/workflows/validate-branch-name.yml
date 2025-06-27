@@ -1,4 +1,4 @@
-name: Validar nombre de rama
+name: Validate branch name
 
 on:
   push:
@@ -9,17 +9,25 @@ on:
       - '**'
 
 jobs:
-  validar-rama:
+  validate-branch:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Validar nombre de rama
+      - name: Get branch name
+        id: get_branch
         run: |
-          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-          echo "Validando rama: $BRANCH_NAME"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "BRANCH_NAME=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+          fi
 
+      - name: Validate branch name
+        run: |
+          BRANCH_NAME="${{ steps.get_branch.outputs.BRANCH_NAME }}"
+          echo "Validating branch name: $BRANCH_NAME"
           if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|release|refactor)/.+$ ]]; then
-            echo "❌ El nombre de la rama '$BRANCH_NAME' es inválido."
-            echo "Debe comenzar con: feature/, bugfix/, hotfix/, release/ o /refactor"
+            echo "❌ Invalid branch name: '$BRANCH_NAME'"
+            echo "Branch name must start with one of the following prefixes: feature/, bugfix/, hotfix/, release/, or refactor/"
             exit 1
           fi
