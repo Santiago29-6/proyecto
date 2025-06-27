@@ -19,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Necesario para tags y branches
+          fetch-depth: 0
 
       - name: Set up Git
         run: |
@@ -32,35 +32,27 @@ jobs:
           TITLE="${{ github.event.pull_request.title }}"
           echo "📌 PR title: $TITLE"
           
-          # Validar formato: 000 (tipo): descripción
           if [[ ! "$TITLE" =~ ^[0-9]{3}\ \((feat|fix|refactor|test|hotfix)\):\ .+ ]]; then
-            echo "❌ ERROR: PR title format is invalid."
-            echo "Expected format: '000 (feat|fix|refactor|test|hotfix): Description'"
-            exit 1
+            echo "ℹ️ PR title format is invalid. Skipping workflow."
+            echo "CHANGE_TYPE=skip" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
           
-          # Extraer tipo de cambio
           TYPE=$(echo "$TITLE" | sed -nE 's/^[0-9]{3} \(([^)]+)\):.*/\1/p')
           echo "🔍 Detected type: $TYPE"
           
-          # Determinar tipo de versión (minor para features, patch para fixes)
           if echo "$TYPE" | grep -Eiq "^(feat|refactor|test)$"; then
             echo "CHANGE_TYPE=minor" >> "$GITHUB_OUTPUT"
           elif echo "$TYPE" | grep -Eiq "^(fix|hotfix)$"; then
             echo "CHANGE_TYPE=patch" >> "$GITHUB_OUTPUT"
           else
-            echo "CHANGE_TYPE=none" >> "$GITHUB_OUTPUT"
+            echo "CHANGE_TYPE=skip" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
-      - name: Stop if not a release-related PR
-        if: steps.pr.outputs.CHANGE_TYPE == 'none'
-        run: |
-          echo "ℹ️ PR is not related to a release. Skipping workflow."
-          exit 0
-
-      - name: Get current version from pom.xml
+      - name: Get current version
         id: version
-        if: steps.pr.outputs.CHANGE_TYPE != 'none'
+        if: steps.pr.outputs.CHANGE_TYPE != 'skip'
         run: |
           CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-SNAPSHOT//')
@@ -69,50 +61,39 @@ jobs:
 
       - name: Calculate new versions
         id: next
-        if: steps.pr.outputs.CHANGE_TYPE != 'none'
+        if: steps.pr.outputs.CHANGE_TYPE != 'skip'
         run: |
           IFS='.' read -r MAJOR MINOR PATCH <<< "${{ steps.version.outputs.BASE_VERSION }}"
-          TYPE="${{ steps.pr.outputs.CHANGE_TYPE }}"
           
-          if [ "$TYPE" = "minor" ]; then
-            # Feature/Refactor/Test → Incrementa minor (0.5.0 → 0.6.0-SNAPSHOT)
+          if [ "${{ steps.pr.outputs.CHANGE_TYPE }}" = "minor" ]; then
             RELEASE_VERSION="$MAJOR.$MINOR.0"
             NEXT_VERSION="$MAJOR.$((MINOR + 1)).0-SNAPSHOT"
           else
-            # Fix/Hotfix → Incrementa patch (0.5.0 → 0.5.1-SNAPSHOT)
             RELEASE_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
             NEXT_VERSION="$MAJOR.$MINOR.$((PATCH + 1))-SNAPSHOT"
           fi
           
           echo "RELEASE_VERSION=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
           echo "NEXT_VERSION=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Debug versions
-        run: |
-          echo "📌 Current version: ${{ steps.version.outputs.CURRENT_VERSION }}"
-          echo "📦 Release version: ${{ steps.next.outputs.RELEASE_VERSION }}"
-          echo "🔧 Next main version: ${{ steps.next.outputs.NEXT_VERSION }}"
+          echo "🎯 Release: $RELEASE_VERSION | Next: $NEXT_VERSION"
 
       - name: Create release branch and tag
-        if: steps.pr.outputs.CHANGE_TYPE != 'none'
+        if: steps.pr.outputs.CHANGE_TYPE != 'skip'
         run: |
-          # Crear rama release/x.y.z
           git checkout -b release/${{ steps.next.outputs.RELEASE_VERSION }}
           git push origin release/${{ steps.next.outputs.RELEASE_VERSION }}
           
-          # Crear tag x.y.z
           git tag ${{ steps.next.outputs.RELEASE_VERSION }}
           git push origin ${{ steps.next.outputs.RELEASE_VERSION }}
+          echo "✅ Created release/${{ steps.next.outputs.RELEASE_VERSION }} and tag ${{ steps.next.outputs.RELEASE_VERSION }}"
 
-      - name: Update version in main
-        if: steps.pr.outputs.CHANGE_TYPE != 'none'
+      - name: Update main to next snapshot
+        if: steps.pr.outputs.CHANGE_TYPE != 'skip'
         run: |
           git checkout main
-          
-          # Actualizar pom.xml con la nueva versión SNAPSHOT
           mvn versions:set -DnewVersion=${{ steps.next.outputs.NEXT_VERSION }} -DgenerateBackupPoms=false
           
-          # Commit y push
           git add pom.xml
           git commit -m "chore: bump version to ${{ steps.next.outputs.NEXT_VERSION }} [skip ci]"
           git push origin main
+          echo "🔄 Main updated to ${{ steps.next.outputs.NEXT_VERSION }}"
