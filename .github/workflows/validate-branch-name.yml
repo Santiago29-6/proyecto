@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get branch name (pull_request or push)
+      - name: Get branch name (for push or pull_request)
         id: extract_branch
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -26,12 +26,19 @@ jobs:
             echo "branch_name=${GITHUB_REF#refs/heads/}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Validate branch name format
+      - name: Validate branch name
         run: |
           BRANCH_NAME="${{ steps.extract_branch.outputs.branch_name }}"
           echo "Branch name: $BRANCH_NAME"
+
+          if [[ "$BRANCH_NAME" == "main" ]]; then
+            echo "✅ Skipping validation for 'main' branch."
+            exit 0
+          fi
+
           if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|release|refactor)/.+$ ]]; then
-            echo "❌ Invalid branch name: $BRANCH_NAME"
+            echo "❌ Invalid branch name: '$BRANCH_NAME'"
+            echo "Branch name must start with: feature/, bugfix/, hotfix/, release/, or refactor/"
             exit 1
           else
             echo "✅ Valid branch name: $BRANCH_NAME"
