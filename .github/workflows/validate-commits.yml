@@ -1,4 +1,4 @@
-name: Validate last non-merge commit message
+name: Validate all commit messages
 
 on:
   push:
@@ -9,27 +9,39 @@ on:
       - '**'
 
 jobs:
-  validate-commit:
+  validate-commit-messages:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Validate last non-merge commit message
+      - name: Get and validate commit messages
         run: |
-          COMMIT_MESSAGE=$(git log --no-merges -1 --pretty=%s)
-          echo "Last non-merge commit message: '$COMMIT_MESSAGE'"
-
-          if [[ ! "$COMMIT_MESSAGE" =~ ^[0-9]{3}\ \((feat|fix|test|refactor)\):\ .+ ]]; then
-            echo "❌ Invalid commit message: '$COMMIT_MESSAGE'"
-            echo "Commit message must follow this format:"
-            echo "NNN (type): message"
-            echo "Where:"
-            echo "  - NNN is a 3-digit number (e.g. 011)"
-            echo "  - type is one of: feat, fix, test, refactor"
-            echo "  - message is a description"
-            exit 1
+          echo "🔍 Getting commit messages..."
+          
+          # Get list of all commits between base and head
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git fetch origin ${{ github.event.pull_request.base.ref }}
+            COMMITS=$(git log --pretty=%s origin/${{ github.event.pull_request.base.ref }}..HEAD)
           else
-            echo "✅ Commit message is valid."
+            COMMITS=$(git log --pretty=%s ${{ github.event.before }}..${{ github.sha }})
           fi
+
+          echo "$COMMITS" | while IFS= read -r COMMIT_MESSAGE; do
+            echo "➡️ Commit: '$COMMIT_MESSAGE'"
+
+            if [[ "$COMMIT_MESSAGE" =~ ^Merge ]]; then
+              echo "ℹ️ Skipping merge commit."
+              continue
+            fi
+
+            if [[ ! "$COMMIT_MESSAGE" =~ ^[0-9]{3}\ \((feat|fix|test|chore|refactor|docs)\):\ .+ ]]; then
+              echo "❌ Invalid commit message: '$COMMIT_MESSAGE'"
+              echo "✅ Expected format: 'NNN (type): descriptive message'"
+              echo "🔒 Push has been blocked."
+              exit 1
+            fi
+          done
+
+          echo "✅ All commit messages are valid."
