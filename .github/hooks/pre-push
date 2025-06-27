@@ -1,0 +1,28 @@
+#!/bin/bash
+VALID_PATTERN='^[0-9]{3} \((feat|fix|test|refactor|chore|docs)\): .+$'
+
+while read local_ref local_sha remote_ref remote_sha
+do
+  branch=$(echo "$remote_ref" | sed 's|refs/heads/||')
+
+
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    last_commit=$local_sha
+  else
+    last_commit=$(git rev-list --max-count=1 "$remote_sha..$local_sha")
+  fi
+
+  message=$(git log --format=%s -n 1 "$last_commit")
+  echo "🔍 Validating last commit on push to '$branch':"
+  echo "➡️ Commit: $message"
+
+  if ! [[ "$message" =~ $VALID_PATTERN ]]; then
+    echo "❌ Invalid commit message."
+    echo "✅ Expected format: '011 (feat): Clear and descriptive message'"
+    echo "🔒 Push has been blocked."
+    exit 1
+  fi
+done
+
+echo "✅ Last commit message is valid. Proceeding with push."
+exit 0

@@ -1,0 +1,67 @@
+name: Validate all commit messages
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - release/**
+    tags-ignore:
+      - '**'
+  pull_request:
+    branches-ignore:
+      - main
+      - release/**
+
+
+jobs:
+  validate-commit-messages:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Trae todo el historial
+
+      - name: Ensure full history (in case of shallow clones)
+        run: |
+          git fetch --unshallow || true
+          git fetch --all
+
+      - name: Get and validate commit messages
+        run: |
+          echo "🔍 Getting commit messages..."
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_BRANCH=${{ github.event.pull_request.base.ref }}
+            git fetch origin "$BASE_BRANCH"
+            RANGE="origin/$BASE_BRANCH..HEAD"
+          else
+            RANGE="${{ github.event.before }}..${{ github.sha }}"
+          fi
+
+          # Validar que el rango sea válido
+          if ! git rev-list "$RANGE" >/dev/null 2>&1; then
+            echo "⚠️ Commit range '$RANGE' is not valid (possibly due to missing history). Skipping validation."
+            exit 0
+          fi
+
+          COMMITS=$(git log --pretty=%s $RANGE)
+
+          echo "$COMMITS" | while IFS= read -r COMMIT_MESSAGE; do
+            echo "➡️ Commit: '$COMMIT_MESSAGE'"
+
+            if [[ "$COMMIT_MESSAGE" =~ ^Merge ]]; then
+              echo "ℹ️ Skipping merge commit."
+              continue
+            fi
+
+            if [[ ! "$COMMIT_MESSAGE" =~ ^[0-9]{3}\ \((feat|fix|test|refactor)\):\ .+ ]]; then
+              echo "❌ Invalid commit message: '$COMMIT_MESSAGE'"
+              echo "✅ Expected format: 'NNN (type): descriptive message'"
+              echo "🔒 Push has been blocked."
+              exit 1
+            fi
+          done
+
+          echo "✅ All commit messages are valid."
