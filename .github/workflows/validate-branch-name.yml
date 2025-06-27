@@ -35,7 +35,7 @@ jobs:
 
       - name: Validate branch name
         run: |
-          BRANCH_NAME="${{ steps.get_branch.outputs.branch_name }}"
+          BRANCH_NAME="${{ github.head_ref }}"
           echo "Validating branch name: $BRANCH_NAME"
           if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|release|refactor)/.+$ ]]; then
             echo "❌ Invalid branch name: '$BRANCH_NAME'"
