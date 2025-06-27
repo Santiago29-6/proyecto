@@ -42,11 +42,9 @@ jobs:
             exit 0
           fi
           
-          # Extraer tipo de cambio
           TYPE=$(echo "$TITLE" | sed -nE 's/^[0-9]{3} \(([^)]+)\):.*/\1/p')
           echo "🔍 Detected type: $TYPE"
           
-          # Determinar tipo de versión
           if echo "$TYPE" | grep -Eiq "^(feat|refactor|test)$"; then
             echo "CHANGE_TYPE=minor" >> $GITHUB_OUTPUT
           elif echo "$TYPE" | grep -Eiq "^(fix|hotfix)$"; then
@@ -54,13 +52,6 @@ jobs:
           else
             echo "CHANGE_TYPE=skip" >> $GITHUB_OUTPUT
             exit 0
-          fi
-
-      - name: Debug PR type
-        run: |
-          echo "Change type: ${{ steps.pr.outputs.CHANGE_TYPE }}"
-          if [ "${{ steps.pr.outputs.CHANGE_TYPE }}" = "skip" ]; then
-            echo "🛑 Skipping release workflow"
           fi
 
       - name: Get current version
@@ -71,7 +62,6 @@ jobs:
           BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-SNAPSHOT//')
           echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_OUTPUT
-          echo "📦 Current version: $CURRENT_VERSION"
 
       - name: Calculate new versions
         if: steps.pr.outputs.CHANGE_TYPE != 'skip'
@@ -89,7 +79,6 @@ jobs:
           
           echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_OUTPUT
           echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_OUTPUT
-          echo "🎯 Release: $RELEASE_VERSION | Next: $NEXT_VERSION"
 
       - name: Create release branch and tag
         env:
@@ -111,6 +100,22 @@ jobs:
           mvn versions:set -DnewVersion=${{ steps.next.outputs.NEXT_VERSION }} -DgenerateBackupPoms=false
           
           git add pom.xml
-          git commit -m "chore: bump version to ${{ steps.next.outputs.NEXT_VERSION }} [skip ci]"
+          git commit -m "[Git Actions no-suffix] Update branch with version ${{ steps.next.outputs.NEXT_VERSION }}"
           git push origin main
-          echo "🔄 Main updated to ${{ steps.next.outputs.NEXT_VERSION }}"
+
+      - name: Create GitHub Release
+        if: steps.pr.outputs.CHANGE_TYPE != 'skip'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.next.outputs.RELEASE_VERSION }}
+          name: Release ${{ steps.next.outputs.RELEASE_VERSION }}
+          body: |
+            ## 🚀 New Release ${{ steps.next.outputs.RELEASE_VERSION }}
+            **Change Type:** ${{ steps.pr.outputs.CHANGE_TYPE }}
+            **PR:** #${{ github.event.pull_request.number }}
+            **Author:** ${{ github.event.pull_request.user.login }}
+            **Description:**
+            ${{ github.event.pull_request.title }}
+          prerelease: false
+          draft: false
+          latest: true
