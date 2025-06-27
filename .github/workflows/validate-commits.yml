@@ -1,0 +1,49 @@
+name: Validate Commit Messages
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - '**'  # cualquier rama
+
+jobs:
+  check-commits:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Commit Messages
+        run: |
+          echo "🔍 Validating commit messages..."
+
+          # Determina el rango de commits según el evento
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            RANGE="${{ github.event.before }}..${{ github.event.after }}"
+          else
+            RANGE="origin/${{ github.base_ref }}..HEAD"
+          fi
+
+          echo "📦 Commit range: $RANGE"
+
+          ERROR=0
+
+          git fetch origin ${{ github.base_ref }} --depth=1 || true
+
+          git log $RANGE --pretty=format:"%s" | while read -r COMMIT_MSG; do
+            echo "🔸 Checking: $COMMIT_MSG"
+            if [[ ! "$COMMIT_MSG" =~ ^[0-9]{3}\ \((feat|fix|test|chore|refactor|docs)\):\ .+#([0-9]+)$ ]]; then
+              echo "❌ Invalid commit message format: '$COMMIT_MSG'"
+              echo "Expected: '007 (feat): Descripción clara del cambio #NN'"
+              ERROR=1
+            fi
+          done
+
+          if [[ $ERROR -eq 1 ]]; then
+            echo "❌ Commit message validation failed."
+            exit 1
+          fi
+
+          echo "✅ All commit messages are valid."

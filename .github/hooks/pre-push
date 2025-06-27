@@ -1,0 +1,25 @@
+#!/bin/bash
+
+VALID_PATTERN='^[0-9]{3} \((feat|fix|test|refactor|chore|docs)\): .+$'
+
+while read local_ref local_sha remote_ref remote_sha
+do
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    range=$local_sha
+  else
+    range="$remote_sha..$local_sha"
+  fi
+
+  for commit in $(git rev-list $range); do
+    message=$(git log --format=%s -n 1 $commit)
+    echo "🔍 Validando commit: $message"
+    if ! [[ "$message" =~ $VALID_PATTERN ]]; then
+      echo "❌ Commit inválido: '$message'"
+      echo "✅ Formato requerido: '011 (feat): Descripción del cambio'"
+      exit 1
+    fi
+  done
+done
+
+echo "✅ Todos los commits cumplen con el formato."
+exit 0
