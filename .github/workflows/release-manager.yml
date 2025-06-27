@@ -92,14 +92,17 @@ jobs:
           echo "🎯 Release: $RELEASE_VERSION | Next: $NEXT_VERSION"
 
       - name: Create release branch and tag
-        if: steps.pr.outputs.CHANGE_TYPE != 'skip'
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git checkout -b release/${{ steps.next.outputs.RELEASE_VERSION }}
-          git push origin release/${{ steps.next.outputs.RELEASE_VERSION }}
-          
-          git tag ${{ steps.next.outputs.RELEASE_VERSION }}
-          git push origin ${{ steps.next.outputs.RELEASE_VERSION }}
-          echo "✅ Created release/${{ steps.next.outputs.RELEASE_VERSION }} and tag ${{ steps.next.outputs.RELEASE_VERSION }}"
+            # Crear rama release
+            git checkout -b release/${{ steps.next.outputs.RELEASE_VERSION }}
+            git push origin release/${{ steps.next.outputs.RELEASE_VERSION }}
+            
+            # Crear tag
+            git tag ${{ steps.next.outputs.RELEASE_VERSION }}
+            git push origin ${{ steps.next.outputs.RELEASE_VERSION }}
+            echo "✅ Created release/${{ steps.next.outputs.RELEASE_VERSION }} and tag ${{ steps.next.outputs.RELEASE_VERSION }}"
 
       - name: Update main to next snapshot
         if: steps.pr.outputs.CHANGE_TYPE != 'skip'
