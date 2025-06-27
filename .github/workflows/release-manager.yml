@@ -1,12 +1,14 @@
 name: Auto Release Manager
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
       - main
 
 jobs:
   release:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     name: Versioning and Release
 
@@ -14,41 +16,55 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Git config
+      - name: Set up Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Validate PR title and extract change type
+        id: pr
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          echo "📌 PR title: $TITLE"
+
+          # Validar formato: 000 (tipo): descripción
+          if [[ ! "$TITLE" =~ ^[0-9]{3}\ \((feat|fix|refactor|test|hotfix)\):\ .+ ]]; then
+            echo "❌ ERROR: PR title format is invalid."
+            echo "Expected format: '000 (feat|fix|refactor|test|hotfix): Description'"
+            exit 1
+          fi
+
+          # Extraer tipo de cambio entre paréntesis
+          TYPE=$(echo "$TITLE" | sed -nE 's/^[0-9]{3} \(([^)]+)\):.*/\1/p')
+          echo "🔍 Detected type: $TYPE"
+
+          # Determinar tipo de cambio
+          if echo "$TYPE" | grep -Eiq "^(feat|refactor|test)$"; then
+            echo "CHANGE_TYPE=minor" >> "$GITHUB_OUTPUT"
+          elif echo "$TYPE" | grep -Eiq "^(fix|hotfix)$"; then
+            echo "CHANGE_TYPE=patch" >> "$GITHUB_OUTPUT"
+          else
+            echo "CHANGE_TYPE=none" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stop if not a release-related PR
+        if: steps.pr.outputs.CHANGE_TYPE == 'none'
+        run: echo "ℹ️ PR is not related to a release. Skipping workflow."
+
       - name: Get current version from pom.xml
         id: version
+        if: steps.pr.outputs.CHANGE_TYPE != 'none'
         run: |
           FULL_VERSION=$(grep -oPm1 "(?<=<version>)[^<]+" pom.xml | grep -v 'parent')
           BASE_VERSION=$(echo "$FULL_VERSION" | sed 's/-SNAPSHOT//')
-          echo "VERSION=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION=$BASE_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Detect change type from commit message
-        id: changetype
-        run: |
-          LAST_COMMIT=$(git log -1 --pretty=%s)
-          echo "Last commit: $LAST_COMMIT"
-
-          if echo "$LAST_COMMIT" | grep -Eiq "^(release|refactor|test)"; then
-            echo "CHANGE_TYPE=minor" >> $GITHUB_OUTPUT
-          elif echo "$LAST_COMMIT" | grep -Eiq "^(bugfix|hotfix)"; then
-            echo "CHANGE_TYPE=patch" >> $GITHUB_OUTPUT
-          else
-            echo "CHANGE_TYPE=none" >> $GITHUB_OUTPUT
-
-      - name: Stop if not a release-type commit
-        if: steps.changetype.outputs.CHANGE_TYPE == 'none'
-        run: echo "🔁 Not a release-related commit. Skipping workflow."
-
-      - name: Calculate next versions
+      - name: Calculate new versions
         id: next
-        if: steps.changetype.outputs.CHANGE_TYPE != 'none'
+        if: steps.pr.outputs.CHANGE_TYPE != 'none'
         run: |
           IFS='.' read -r MAJOR MINOR PATCH <<< "${{ steps.version.outputs.VERSION }}"
-          TYPE=${{ steps.changetype.outputs.CHANGE_TYPE }}
+          TYPE="${{ steps.pr.outputs.CHANGE_TYPE }}"
 
           if [ "$TYPE" = "minor" ]; then
             RELEASE_VERSION="$MAJOR.$MINOR.$PATCH"
@@ -59,8 +75,8 @@ jobs:
             NEXT_VERSION="$MAJOR.$MINOR.$PATCH-SNAPSHOT"
           fi
 
-          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_OUTPUT
-          echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "RELEASE_VERSION=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "NEXT_VERSION=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Debug versions
         run: |
@@ -68,7 +84,7 @@ jobs:
           echo "🔧 Next main version: ${{ steps.next.outputs.NEXT_VERSION }}"
 
       - name: Create release branch and tag
-        if: steps.changetype.outputs.CHANGE_TYPE != 'none'
+        if: steps.pr.outputs.CHANGE_TYPE != 'none'
         run: |
           git checkout -b release/${{ steps.next.outputs.RELEASE_VERSION }}
           git push origin release/${{ steps.next.outputs.RELEASE_VERSION }}
@@ -77,7 +93,7 @@ jobs:
           git push origin ${{ steps.next.outputs.RELEASE_VERSION }}
 
       - name: Update version in main
-        if: steps.changetype.outputs.CHANGE_TYPE != 'none'
+        if: steps.pr.outputs.CHANGE_TYPE != 'none'
         run: |
           git checkout main
           sed -i "s/<version>.*<\/version>/<version>${{ steps.next.outputs.NEXT_VERSION }}<\/version>/" pom.xml
