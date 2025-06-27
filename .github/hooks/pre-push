@@ -1,25 +1,33 @@
 #!/bin/bash
 
+# Regex pattern for valid commit messages
 VALID_PATTERN='^[0-9]{3} \((feat|fix|test|refactor|chore|docs)\): .+$'
 
 while read local_ref local_sha remote_ref remote_sha
 do
+  # Get target branch name
+  branch=$(echo "$remote_ref" | sed 's|refs/heads/||')
+
+  # Determine the commit range
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
     range=$local_sha
   else
     range="$remote_sha..$local_sha"
   fi
 
+  echo "🔍 Checking commits for push to '$branch' in range: $range"
+
   for commit in $(git rev-list $range); do
     message=$(git log --format=%s -n 1 $commit)
-    echo "🔍 Validando commit: $message"
+    echo "➡️ Commit: $message"
     if ! [[ "$message" =~ $VALID_PATTERN ]]; then
-      echo "❌ Commit inválido: '$message'"
-      echo "✅ Formato requerido: '011 (feat): Descripción del cambio'"
+      echo "❌ Invalid commit message: '$message'"
+      echo "✅ Expected format: '011 (feat): Clear and descriptive message'"
+      echo "🔒 Push has been blocked."
       exit 1
     fi
   done
 done
 
-echo "✅ Todos los commits cumplen con el formato."
+echo "✅ All commit messages are valid. Proceeding with push."
 exit 0
