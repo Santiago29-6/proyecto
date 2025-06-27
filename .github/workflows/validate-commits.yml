@@ -1,4 +1,4 @@
-name: Validate last commit message
+name: Validate last non-merge commit message
 
 on:
   push:
@@ -16,10 +16,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Validate last commit message
+      - name: Validate last non-merge commit message
         run: |
-          COMMIT_MESSAGE=$(git log -1 --pretty=%s)
-          echo "Last commit message: '$COMMIT_MESSAGE'"
+          COMMIT_MESSAGE=$(git log --no-merges -1 --pretty=%s)
+          echo "Last non-merge commit message: '$COMMIT_MESSAGE'"
 
           if [[ ! "$COMMIT_MESSAGE" =~ ^[0-9]{3}\ \((feat|fix|test|refactor)\):\ .+ ]]; then
             echo "❌ Invalid commit message: '$COMMIT_MESSAGE'"
