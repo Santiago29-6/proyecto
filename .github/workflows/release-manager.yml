@@ -1,0 +1,77 @@
+name: Auto Release Manager
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    name: Versioning and Release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get current version from pom.xml
+        id: version
+        run: |
+          VERSION=$(grep -m1 '<version>' pom.xml | sed -E 's/.*<version>(.+)-SNAPSHOT<\/version>.*/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Determine change type from commit
+        id: changetype
+        run: |
+          LAST_COMMIT=$(git log -1 --pretty=%s)
+          echo "Last commit: $LAST_COMMIT"
+
+          if echo "$LAST_COMMIT" | grep -Eiq "^(release|refactor|test)"; then
+            echo "CHANGE_TYPE=minor" >> $GITHUB_OUTPUT
+          elif echo "$LAST_COMMIT" | grep -Eiq "^(fix|hotfix)"; then
+            echo "CHANGE_TYPE=patch" >> $GITHUB_OUTPUT
+          else
+            echo "CHANGE_TYPE=none" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Exit if not a release-type commit
+        if: steps.changetype.outputs.CHANGE_TYPE == 'none'
+        run: echo "Not a release-related commit. Skipping..."
+
+      - name: Calculate next versions
+        id: next
+        run: |
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${{ steps.version.outputs.VERSION }}"
+          TYPE=${{ steps.changetype.outputs.CHANGE_TYPE }}
+
+          if [ "$TYPE" = "minor" ]; then
+            RELEASE_VERSION="$MAJOR.$MINOR.$PATCH"
+            NEXT_VERSION="$MAJOR.$((MINOR+1)).0-SNAPSHOT"
+          else
+            PATCH=$((PATCH+1))
+            RELEASE_VERSION="$MAJOR.$MINOR.$PATCH"
+            NEXT_VERSION="$RELEASE_VERSION-SNAPSHOT"
+          fi
+
+          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+          echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create release branch and tag
+        run: |
+          git checkout -b release/${{ steps.next.outputs.RELEASE_VERSION }}
+          git push origin release/${{ steps.next.outputs.RELEASE_VERSION }}
+
+          git tag ${{ steps.next.outputs.RELEASE_VERSION }}
+          git push origin ${{ steps.next.outputs.RELEASE_VERSION }}
+
+      - name: Update version in main branch
+        run: |
+          git checkout main
+          sed -i "s/<version>.*<\/version>/<version>${{ steps.next.outputs.NEXT_VERSION }}<\/version>/" pom.xml
+          git commit -am "chore: bump version to ${{ steps.next.outputs.NEXT_VERSION }}"
+          git push origin main
